@@ -8,10 +8,13 @@ from pygame.locals import *
 pygame.init()
 pygame.camera.init()
 
+screen_size = (800, 480)
+image_size = (400, 300)
+
 class Camera(object):
     def __init__(self):
         # Image size to capture
-        self.size = (640, 480)
+        self.size = image_size
 
         # We're lazy, just use the first camera
         cameras = pygame.camera.list_cameras()
@@ -65,7 +68,7 @@ class StopMotion(object):
 
 class Capture(object):
     def __init__(self):
-        self.size = (1280, 720)
+        self.size = screen_size
         # create a display surface. standard pygame stuff
         self.display = pygame.display.set_mode(self.size, 0)
 
@@ -89,7 +92,7 @@ class Capture(object):
             self.timer = time.time()
             v = self.video.get_next()
             if v is not None:
-                self.display.blit(v, (640, 0))
+                self.display.blit(v, (screen_size[0]/2, 0))
 
     def main(self):
         going = True
