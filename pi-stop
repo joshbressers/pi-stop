@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+import pygame
+import pygame.camera
+from pygame.locals import *
+
+pygame.init()
+pygame.camera.init()
+
+class Camera(object):
+    def __init__(self):
+        # Image size to capture
+        self.size = (640, 480)
+
+        # We're lazy, just use the first camera
+        cameras = pygame.camera.list_cameras()
+        self.cam = pygame.camera.Camera(cameras[0], self.size)
+        self.cam.start()
+
+        self.snapshot = None
+
+    def capture(self):
+        "Get an image from the camera if it's ready"
+
+        #if self.cam.query_image():
+        self.snapshot = self.cam.get_image()
+
+        return self.snapshot
+
+    def get(self):
+        "Return the image that has been captured"
+
+        return self.snapshot
+
+    def close(self):
+        "Shut things down"
+
+        self.cam.stop()
+
+class Capture(object):
+    def __init__(self):
+        self.size = (1280, 720)
+        # create a display surface. standard pygame stuff
+        self.display = pygame.display.set_mode(self.size, 0)
+
+        self.cam = Camera()
+
+        # create a surface to capture to.  for performance purposes
+        # bit depth is the same as that of the display surface.
+        self.snapshot = pygame.surface.Surface(self.size, 0, self.display)
+
+    def get_and_flip(self):
+
+        # blit it to the display surface.  simple!
+        self.snapshot = self.cam.capture()
+        self.display.blit(self.snapshot, (0,0))
+        pygame.display.flip()
+
+    def main(self):
+        going = True
+        while going:
+            events = pygame.event.get()
+            for e in events:
+                if e.type == QUIT or (e.type == KEYDOWN and e.key == K_ESCAPE):
+                    # close the camera safely
+                    self.cam.stop()
+                    going = False
+
+            self.get_and_flip()
+
+c = Capture()
+c.main()
