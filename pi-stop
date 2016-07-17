@@ -66,16 +66,62 @@ class StopMotion(object):
 
         return current_image
 
+    def clear(self):
+        "Clear the motion queue"
+
+        self.images = []
+        self.index = 0
+
+class Button(object):
+
+    def __init__(self, position, text, color):
+        self.position = position
+        self.color = color
+        self.surface = pygame.surface.Surface((150,100))
+        self.surface.fill(self.color)
+
+        self.font = pygame.font.Font(None, 36)
+        self.f_surface = self.font.render(text, 1, (255, 255, 255))
+
+        # Calculate where the font surface goes
+        f_y = (self.surface.get_height() / 2) - (self.f_surface.get_height() / 2)
+        f_x = (self.surface.get_width() / 2) - (self.f_surface.get_width() / 2)
+        self.f_position = (f_x + position[0], f_y + position[1])
+
+    def display(self, display):
+        "print the button on the display"
+
+        display.blit(self.surface, self.position)
+        display.blit(self.f_surface, self.f_position)
+
+    def clicked(self):
+        "True if the mouse click happened inside this box"
+
+        pos = pygame.mouse.get_pos()
+
+        if (pos[0] > self.position[0] and pos[0] < self.position[0] + 150) and \
+           (pos[1] > self.position[1] and pos[1] < self.position[1] + 100):
+            return True
+
+        return False
+
 class Capture(object):
     def __init__(self):
         self.size = screen_size
         # create a display surface. standard pygame stuff
         self.display = pygame.display.set_mode(self.size, 0)
+        #self.display = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
         self.timer = time.time()
+        self.preview = True
 
         self.cam = Camera()
         self.video = StopMotion()
+
+        self.snapshot_button = Button((50, 340), "Snapshot", (255, 0, 255))
+        self.stop_button = Button((220, 340), "Stop", (255, 0, 0))
+        self.start_button = Button((390, 340), "Start", (0, 255, 0))
+        self.reset_button = Button((560, 340), "Reset", (0, 255, 0))
 
         # create a surface to capture to.  for performance purposes
         # bit depth is the same as that of the display surface.
@@ -86,13 +132,19 @@ class Capture(object):
         # blit it to the display surface.  simple!
         self.snapshot = self.cam.capture()
         self.display.blit(self.snapshot, (0,0))
-        pygame.display.flip()
 
-        if (time.time() - self.timer > 1):
+        if self.preview and (time.time() - self.timer > 1):
             self.timer = time.time()
             v = self.video.get_next()
             if v is not None:
                 self.display.blit(v, (screen_size[0]/2, 0))
+
+        self.snapshot_button.display(self.display)
+        self.stop_button.display(self.display)
+        self.start_button.display(self.display)
+        self.reset_button.display(self.display)
+
+        pygame.display.flip()
 
     def main(self):
         going = True
@@ -101,10 +153,20 @@ class Capture(object):
             for e in events:
                 if e.type == QUIT or (e.type == KEYDOWN and e.key == K_ESCAPE):
                     # close the camera safely
-                    self.cam.stop()
+                    #self.cam.stop()
                     going = False
                 if (e.type == KEYDOWN and e.key == K_SPACE):
                     self.video.add_image(self.snapshot)
+                if (e.type == MOUSEBUTTONDOWN and self.snapshot_button.clicked()):
+                    self.video.add_image(self.snapshot)
+                if (e.type == MOUSEBUTTONDOWN and self.stop_button.clicked()):
+                    self.preview = False
+                if (e.type == MOUSEBUTTONDOWN and self.start_button.clicked()):
+                    self.preview = True
+                if (e.type == MOUSEBUTTONDOWN and self.reset_button.clicked()):
+                    v = pygame.surface.Surface(image_size)
+                    self.display.blit(v, (screen_size[0]/2, 0))
+                    self.video.clear()
 
             self.get_and_flip()
 
