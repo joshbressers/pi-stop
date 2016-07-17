@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import time
 import pygame
 import pygame.camera
 from pygame.locals import *
@@ -37,13 +38,41 @@ class Camera(object):
 
         self.cam.stop()
 
+class StopMotion(object):
+    def __init__(self):
+
+        self.images = []
+        self.index = 0
+
+    def add_image(self, image):
+        "Add an image to the stop motion loop"
+
+        self.images.append(image)
+
+    def get_next(self):
+        "Get the next image in the loop"
+
+        if len(self.images) == 0:
+            return None
+
+        current_image = self.images[self.index]
+
+        self.index = self.index + 1
+        if self.index >= len(self.images):
+            self.index = 0
+
+        return current_image
+
 class Capture(object):
     def __init__(self):
         self.size = (1280, 720)
         # create a display surface. standard pygame stuff
         self.display = pygame.display.set_mode(self.size, 0)
 
+        self.timer = time.time()
+
         self.cam = Camera()
+        self.video = StopMotion()
 
         # create a surface to capture to.  for performance purposes
         # bit depth is the same as that of the display surface.
@@ -56,6 +85,12 @@ class Capture(object):
         self.display.blit(self.snapshot, (0,0))
         pygame.display.flip()
 
+        if (time.time() - self.timer > 1):
+            self.timer = time.time()
+            v = self.video.get_next()
+            if v is not None:
+                self.display.blit(v, (640, 0))
+
     def main(self):
         going = True
         while going:
@@ -65,6 +100,8 @@ class Capture(object):
                     # close the camera safely
                     self.cam.stop()
                     going = False
+                if (e.type == KEYDOWN and e.key == K_SPACE):
+                    self.video.add_image(self.snapshot)
 
             self.get_and_flip()
 
