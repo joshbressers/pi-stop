@@ -128,7 +128,6 @@ class Capture(object):
 
         self.snapshot_button = Button((50, 340), "Snapshot", (255, 0, 255))
         self.stop_button = Button((220, 340), "Stop", (255, 0, 0))
-        self.start_button = Button((390, 340), "Start", (0, 255, 0))
         self.reset_button = Button((560, 340), "Reset", (0, 255, 0))
 
         # create a surface to capture to.  for performance purposes
@@ -152,7 +151,6 @@ class Capture(object):
 
         self.snapshot_button.display(self.display)
         self.stop_button.display(self.display)
-        self.start_button.display(self.display)
         self.reset_button.display(self.display)
 
         pygame.display.flip()
@@ -172,9 +170,12 @@ class Capture(object):
                     if self.snapshot_button.clicked():
                         self.video.add_image(self.snapshot)
                     elif self.stop_button.clicked():
-                        self.preview = False
-                    elif self.start_button.clicked():
-                        self.preview = True
+                        if self.preview:
+                            self.preview = False
+                            self.stop_button.set_text("Start")
+                        else:
+                            self.preview = True
+                            self.stop_button.set_text("Stop")
                     elif self.reset_button.clicked():
                         v = pygame.surface.Surface(image_size)
                         self.display.blit(v, (screen_size[0]/2, 0))
