@@ -118,6 +118,7 @@ class Capture(object):
         self.size = screen_size
         # create a display surface. standard pygame stuff
         self.display = pygame.display.set_mode(self.size, 0)
+        #pygame.mouse.set_visible(False)
         #self.display = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
         self.timer = time.time()
