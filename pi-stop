@@ -74,6 +74,15 @@ class StopMotion(object):
         self.images = []
         self.index = 0
 
+    def get_index(self):
+        "Return a tuple, (current, max)"
+
+        # Zero is special
+        if len(self.images) == 0:
+            return (0, 0)
+
+        return (self.index + 1, len(self.images))
+
 class Button(object):
 
     def __init__(self, position, text, color):
@@ -113,6 +122,22 @@ class Button(object):
 
         return False
 
+class ShowText(object):
+
+    def __init__(self, position):
+        self.position = position
+        self.font = pygame.font.Font(None, 36)
+        self.surface = self.font.render("", 1, (255, 255, 255))
+
+    def print_text(self, display, text):
+        # First clear the old surface
+        self.surface.fill((0, 0, 0))
+        display.blit(self.surface, self.position)
+
+        # Draw the new surface
+        self.surface = self.font.render(text, 1, (255, 255, 255))
+        display.blit(self.surface, self.position)
+
 class Capture(object):
     def __init__(self):
         self.size = screen_size
@@ -130,6 +155,7 @@ class Capture(object):
         self.snapshot_button = Button((50, 340), "Snapshot", (255, 0, 255))
         self.stop_button = Button((220, 340), "Stop", (255, 0, 0))
         self.reset_button = Button((560, 340), "Reset", (0, 255, 0))
+        self.counter = ShowText((560, 300))
 
         # create a surface to capture to.  for performance purposes
         # bit depth is the same as that of the display surface.
@@ -149,6 +175,7 @@ class Capture(object):
             v = self.video.get_next()
             if v is not None:
                 self.display.blit(v, (screen_size[0]/2, 0))
+            self.counter.print_text(self.display, "%s/%s" % self.video.get_index())
 
         self.snapshot_button.display(self.display)
         self.stop_button.display(self.display)
