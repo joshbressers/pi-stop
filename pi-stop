@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import time
 import pygame
 import pygame.camera
@@ -54,6 +55,11 @@ class StopMotion(object):
 
         self.images.append(image)
 
+    def get(self, index):
+        "Get an image"
+
+        return self.images[index]
+
     def get_next(self):
         "Get the next image in the loop"
 
@@ -82,6 +88,11 @@ class StopMotion(object):
             return (0, 0)
 
         return (self.index + 1, len(self.images))
+
+    def set_index(self, index = 0):
+        "Set the current frame index, zero by default"
+
+        self.index = index
 
 class Button(object):
 
@@ -154,6 +165,7 @@ class Capture(object):
 
         self.snapshot_button = Button((50, 340), "Snapshot", (255, 0, 255))
         self.stop_button = Button((220, 340), "Stop", (255, 0, 0))
+        self.write_button = Button((390, 340), "Write", (00, 182, 255))
         self.reset_button = Button((560, 340), "Reset", (0, 255, 0))
         self.counter = ShowText((560, 300))
 
@@ -179,9 +191,30 @@ class Capture(object):
 
         self.snapshot_button.display(self.display)
         self.stop_button.display(self.display)
+        self.write_button.display(self.display)
         self.reset_button.display(self.display)
 
         pygame.display.flip()
+
+    def write(self):
+        "Write out the files for use elsewhere"
+
+        filenames = []
+
+        try:
+            os.stat("pics")
+        except:
+            os.mkdir("pics")
+
+        # Loop over the images
+        for i in range(self.video.get_index()[1]):
+            img = self.video.get(i)
+            filename = "pics/%d.png" % i
+            filenames.append(filename)
+            pygame.image.save(img, filename)
+
+        command = "convert -loop 0 -delay 25 %s output.gif" % " ".join(filenames)
+        os.system(command)
 
     def main(self):
         going = True
@@ -204,6 +237,8 @@ class Capture(object):
                         else:
                             self.preview = True
                             self.stop_button.set_text("Stop")
+                    elif self.write_button.clicked():
+                        self.write()
                     elif self.reset_button.clicked():
                         v = pygame.surface.Surface(image_size)
                         self.display.blit(v, (screen_size[0]/2, 0))
