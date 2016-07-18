@@ -82,13 +82,19 @@ class Button(object):
         self.surface = pygame.surface.Surface((150,100))
         self.surface.fill(self.color)
 
+        self.set_text(text)
+
+
+    def set_text(self, text):
+        "Set the text displayed on the button"
+
         self.font = pygame.font.Font(None, 36)
         self.f_surface = self.font.render(text, 1, (255, 255, 255))
 
         # Calculate where the font surface goes
         f_y = (self.surface.get_height() / 2) - (self.f_surface.get_height() / 2)
         f_x = (self.surface.get_width() / 2) - (self.f_surface.get_width() / 2)
-        self.f_position = (f_x + position[0], f_y + position[1])
+        self.f_position = (f_x + self.position[0], f_y + self.position[1])
 
     def display(self, display):
         "print the button on the display"
