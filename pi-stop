@@ -26,7 +26,9 @@ class Camera(object):
     def capture(self):
         "Get an image from the camera if it's ready"
 
-        #if self.cam.query_image():
+        while (not self.cam.query_image()):
+            # wait for it
+            pass
         self.snapshot = self.cam.get_image()
 
         return self.snapshot
@@ -130,10 +132,13 @@ class Capture(object):
     def get_and_flip(self):
 
         # blit it to the display surface.  simple!
-        self.snapshot = self.cam.capture()
-        self.display.blit(self.snapshot, (0,0))
 
-        if self.preview and (time.time() - self.timer > 1):
+
+        if self.preview and (time.time() - self.timer > 0.1):
+            self.snapshot = self.cam.capture()
+            self.display.blit(self.snapshot, (0,0))
+
+        if self.preview and (time.time() - self.timer > 0.5):
             self.timer = time.time()
             v = self.video.get_next()
             if v is not None:
