@@ -162,16 +162,17 @@ class Capture(object):
                     going = False
                 if (e.type == KEYDOWN and e.key == K_SPACE):
                     self.video.add_image(self.snapshot)
-                if (e.type == MOUSEBUTTONDOWN and self.snapshot_button.clicked()):
-                    self.video.add_image(self.snapshot)
-                if (e.type == MOUSEBUTTONDOWN and self.stop_button.clicked()):
-                    self.preview = False
-                if (e.type == MOUSEBUTTONDOWN and self.start_button.clicked()):
-                    self.preview = True
-                if (e.type == MOUSEBUTTONDOWN and self.reset_button.clicked()):
-                    v = pygame.surface.Surface(image_size)
-                    self.display.blit(v, (screen_size[0]/2, 0))
-                    self.video.clear()
+                if (e.type == MOUSEBUTTONDOWN):
+                    if self.snapshot_button.clicked():
+                        self.video.add_image(self.snapshot)
+                    elif self.stop_button.clicked():
+                        self.preview = False
+                    elif self.start_button.clicked():
+                        self.preview = True
+                    elif self.reset_button.clicked():
+                        v = pygame.surface.Surface(image_size)
+                        self.display.blit(v, (screen_size[0]/2, 0))
+                        self.video.clear()
 
             self.get_and_flip()
 
