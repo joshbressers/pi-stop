@@ -175,20 +175,23 @@ class Capture(object):
 
     def get_and_flip(self):
 
-        # blit it to the display surface.  simple!
-
-
-        if self.preview and (time.time() - self.timer > 0.1):
-            self.snapshot = self.cam.capture()
-            self.display.blit(self.snapshot, (0,0))
-
+        # Only display the preview animation at 2 fps
         if self.preview and (time.time() - self.timer > 0.5):
-            self.timer = time.time()
+            #self.timer = time.time()
             v = self.video.get_next()
             if v is not None:
                 self.display.blit(v, (screen_size[0]/2, 0))
-            self.counter.print_text(self.display, "%s/%s" % self.video.get_index())
+            self.timer = time.time()
 
+
+        # Draw our camera view
+        self.snapshot = self.cam.capture()
+        self.display.blit(self.snapshot, (0,0))
+
+        # Capture current frame / total display
+        self.counter.print_text(self.display, "%s/%s" % self.video.get_index())
+
+        # Buttons
         self.snapshot_button.display(self.display)
         self.stop_button.display(self.display)
         self.write_button.display(self.display)
