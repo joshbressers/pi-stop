@@ -96,18 +96,19 @@ class StopMotion(object):
 
 class Button(object):
 
-    def __init__(self, position, text, color):
+    def __init__(self, position, text, color, size = (150, 100)):
         self.position = position
         self.color = color
-        self.surface = pygame.surface.Surface((150,100))
+        self.size = size
+        self.surface = pygame.surface.Surface(size)
         self.surface.fill(self.color)
 
         self.set_text(text)
 
-
     def set_text(self, text):
         "Set the text displayed on the button"
 
+        self.text = text
         self.font = pygame.font.Font(None, 36)
         self.f_surface = self.font.render(text, 1, (255, 255, 255))
 
@@ -115,6 +116,10 @@ class Button(object):
         f_y = (self.surface.get_height() / 2) - (self.f_surface.get_height() / 2)
         f_x = (self.surface.get_width() / 2) - (self.f_surface.get_width() / 2)
         self.f_position = (f_x + self.position[0], f_y + self.position[1])
+
+    def get_text(self):
+        "Return the button text"
+        return self.text
 
     def display(self, display):
         "print the button on the display"
@@ -127,8 +132,10 @@ class Button(object):
 
         pos = pygame.mouse.get_pos()
 
-        if (pos[0] > self.position[0] and pos[0] < self.position[0] + 150) and \
-           (pos[1] > self.position[1] and pos[1] < self.position[1] + 100):
+        if (pos[0] > self.position[0] and \
+            pos[0] < self.position[0] + self.size[0]) and \
+           (pos[1] > self.position[1] and \
+            pos[1] < self.position[1] + self.size[1]):
             return True
 
         return False
@@ -202,7 +209,91 @@ class Capture(object):
     def write(self):
         "Write out the files for use elsewhere"
 
+        the_name = ""
         filenames = []
+
+        # Get the name of the project
+        #
+        # Clear the screen
+        self.display.fill((0, 0, 0))
+
+        letters = []
+
+        # Build our buttons
+        name_button = Button((10, 0), "Name:", (100, 0, 100), (780, 30))
+        space_button = Button((10, 380), "Space", (100, 0, 100), (200, 80))
+        back_button = Button((220, 380), "Back", (100, 0, 100), (200, 80))
+        done_button = Button((590, 380), "Done", (100, 0, 100), (200, 80))
+
+        count = 0
+        for i in "ABCDEFGHIJ":
+            a_button = Button((count * 80, 35), i, (100, 0, 100), (75, 80))
+            letters.append(a_button)
+            count = count + 1
+
+        count = 0
+        for i in "KLMNOPQRST":
+            a_button = Button((count * 80, 120), i, (100, 0, 100), (75, 80))
+            letters.append(a_button)
+            count = count + 1
+
+        count = 0
+        for i in "UVWXYZ\'-=+":
+            a_button = Button((count * 80, 205), i, (100, 0, 100), (75, 80))
+            letters.append(a_button)
+            count = count + 1
+
+        count = 0
+        for i in "0123456789":
+            a_button = Button((count * 80, 290), i, (100, 0, 100), (75, 80))
+            letters.append(a_button)
+            count = count + 1
+
+        Waiting = True
+        Cancel = False
+        while Waiting:
+            events = pygame.event.get()
+            for e in events:
+                if e.type == QUIT or (e.type == KEYDOWN and e.key == K_ESCAPE):
+                    Waiting = False
+                    Cancel = True
+                if (e.type == MOUSEBUTTONDOWN):
+                    if done_button.clicked():
+                        Waiting = False
+                        the_name = name_button.get_text()[5:]
+                        # If no name is set, don't let them quit
+                        if not the_name:
+                            Cancel = True
+                    elif space_button.clicked():
+                            the_name = name_button.get_text()
+                            the_name = the_name + " "
+                            name_button.set_text(the_name)
+                    elif back_button.clicked():
+                            the_name = name_button.get_text()
+                            the_name = the_name[:-1]
+                            if len(the_name) < 5:
+                                the_name = "Name:"
+                            name_button.set_text(the_name)
+                    for i in letters:
+                        if i.clicked():
+                            pushed_letter = i.get_text()
+                            the_name = name_button.get_text()
+                            the_name = the_name + pushed_letter
+                            name_button.set_text(the_name)
+
+            for i in letters:
+                i.display(self.display)
+            name_button.display(self.display)
+            space_button.display(self.display)
+            back_button.display(self.display)
+            done_button.display(self.display)
+            pygame.display.flip()
+
+        # Clear the screen
+        self.display.fill((0, 0, 0))
+
+        if Cancel:
+            return
 
         try:
             os.stat("pics")
@@ -216,7 +307,7 @@ class Capture(object):
             filenames.append(filename)
             pygame.image.save(img, filename)
 
-        command = "convert -loop 0 -delay 25 %s output.gif" % " ".join(filenames)
+        command = "convert -loop 0 -delay 25 %s %s.gif" % (" ".join(filenames), the_name)
         os.system(command)
 
     def main(self):
