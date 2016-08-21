@@ -2,6 +2,7 @@
 
 import os
 import time
+import subprocess
 import pygame
 import pygame.camera
 from pygame.locals import *
@@ -295,6 +296,7 @@ class Capture(object):
         if Cancel:
             return
 
+        # TODO Use some sort of temporary directory
         try:
             os.stat("pics")
         except:
@@ -307,8 +309,10 @@ class Capture(object):
             filenames.append(filename)
             pygame.image.save(img, filename)
 
-        command = "convert -loop 0 -delay 25 %s %s.gif" % (" ".join(filenames), the_name)
-        os.system(command)
+        command = ["convert", "-loop", "0", "-delay", "25"]
+        command.extend(filenames)
+        command.append("%s.gif" % the_name)
+        subprocess.call(command)
 
     def main(self):
         going = True
