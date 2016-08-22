@@ -309,6 +309,9 @@ class Capture(object):
             filenames.append(filename)
             pygame.image.save(img, filename)
 
+        # XXX Use this someday
+        # ffmpeg -r 1 -f image2 -s 352x288 -i %d.png -vcodec libx264 -crf
+        # 25 -pix_fmt yuv420p test.mp4
         command = ["convert", "-loop", "0", "-delay", "25"]
         command.extend(filenames)
         command.append("%s.gif" % the_name)
