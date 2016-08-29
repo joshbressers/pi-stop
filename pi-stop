@@ -227,28 +227,18 @@ class Capture(object):
         done_button = Button((590, 380), "Done", (100, 0, 100), (200, 80))
 
         count = 0
-        for i in "ABCDEFGHIJ":
-            a_button = Button((count * 80, 35), i, (100, 0, 100), (75, 80))
-            letters.append(a_button)
-            count = count + 1
+        buttons = ["ABCDEFGHIJ",
+                    "KLMNOPQRST",
+                    "UVWXYZ\'-=+",
+                    "0123456789"]
 
-        count = 0
-        for i in "KLMNOPQRST":
-            a_button = Button((count * 80, 120), i, (100, 0, 100), (75, 80))
-            letters.append(a_button)
-            count = count + 1
+        for loop in range(0,len(buttons)):
+            count = 0
+            for i in buttons[loop]:
+                a_button = Button((count * 80, 35 + 85 * loop), i, (100, 0, 100), (75, 80))
+                letters.append(a_button)
+                count = count + 1
 
-        count = 0
-        for i in "UVWXYZ\'-=+":
-            a_button = Button((count * 80, 205), i, (100, 0, 100), (75, 80))
-            letters.append(a_button)
-            count = count + 1
-
-        count = 0
-        for i in "0123456789":
-            a_button = Button((count * 80, 290), i, (100, 0, 100), (75, 80))
-            letters.append(a_button)
-            count = count + 1
 
         Waiting = True
         Cancel = False
