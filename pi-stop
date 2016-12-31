@@ -319,6 +319,10 @@ class Capture(object):
         command.append("%s/%s.gif" % (the_path, the_name))
         subprocess.call(command)
 
+        # Clean up the pics
+        for i in range(self.video.get_index()[1]):
+            filename = "pics/%d.png" % i
+            os.unlink(filename)
 
     def main(self):
         going = True
