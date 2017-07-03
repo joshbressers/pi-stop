@@ -172,10 +172,12 @@ class Capture(object):
         self.cam = Camera()
         self.video = StopMotion()
 
-        self.snapshot_button = Button((50, 340), "Snapshot", (255, 0, 255))
-        self.stop_button = Button((220, 340), "Stop", (255, 0, 0))
-        self.write_button = Button((390, 340), "Write", (00, 182, 255))
-        self.reset_button = Button((560, 340), "Reset", (0, 255, 0))
+        self.snapshot_button = Button((10, 340), "Snapshot", (255, 0, 255))
+        self.stop_button = Button((180, 340), "Stop", (255, 0, 0))
+        self.write_button = Button((350, 340), "Write", (00, 182, 255))
+        self.reset_button = Button((520, 340), "Reset", (0, 255, 0))
+        self.eject_button = Button((690, 340), "Eject", (0, 255, 0), (100, 100))
+        self.shutdown_button = Button((760, 0), "X", (255, 0, 0), (40, 40))
         self.counter = ShowText((560, 300))
 
         # create a surface to capture to.  for performance purposes
@@ -205,8 +207,32 @@ class Capture(object):
         self.stop_button.display(self.display)
         self.write_button.display(self.display)
         self.reset_button.display(self.display)
+        self.eject_button.display(self.display)
+        self.shutdown_button.display(self.display)
 
         pygame.display.flip()
+
+    def shutdown(self):
+        "Shutdown the system"
+
+        command = ["poweroff"]
+        subprocess.call(command)
+
+    def eject(self):
+        "Eject a flash drive"
+
+        # If there is a disk mounted with our uid as the owner, we assume
+        # that's where we put the files.
+        my_uid = os.getuid()
+        uid_string = "uid=%d" % my_uid
+        for i in psutil.disk_partitions():
+            if uid_string in i.opts:
+                the_path = i.mountpoint
+
+        # Build the umount command
+        command = ["umount"]
+        command.append(the_path)
+        subprocess.call(command)
 
     def write(self):
         "Write out the files for use elsewhere"
@@ -347,6 +373,10 @@ class Capture(object):
                             self.stop_button.set_text("Stop")
                     elif self.write_button.clicked():
                         self.write()
+                    elif self.eject_button.clicked():
+                        self.eject()
+                    elif self.shutdown_button.clicked():
+                        self.shutdown()
                     elif self.reset_button.clicked():
                         v = pygame.surface.Surface(image_size)
                         self.display.blit(v, (screen_size[0]/2, 0))
